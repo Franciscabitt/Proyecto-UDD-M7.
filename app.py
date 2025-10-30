@@ -1,18 +1,6 @@
-@app.route("/")
-def home():
-    return "API de predicción funcionando correctamente 🚀" 
-
 import os
 import joblib
-import pandas as pd
 from flask import Flask, request, jsonify
-
-# Ruta base donde está el app.py
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Cargar modelo y vectorizador con ruta absoluta
-modelo = joblib.load(os.path.join(BASE_DIR, "modelo_svc2.pkl"))
-vectorizer = joblib.load(os.path.join(BASE_DIR, "vectorizer_tfidf_svc2.pkl"))
 
 # ==============================
 # 1. Inicializar la aplicación
@@ -20,21 +8,43 @@ vectorizer = joblib.load(os.path.join(BASE_DIR, "vectorizer_tfidf_svc2.pkl"))
 app = Flask(__name__)
 
 # ==============================
-# 3. Ruta de prueba
+# 2. Cargar modelo y vectorizador
 # ==============================
-@app.route('/predict', methods=['POST'])
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+try:
+    modelo = joblib.load(os.path.join(BASE_DIR, "modelo_svc2.pkl"))
+    vectorizer = joblib.load(os.path.join(BASE_DIR, "vectorizer_tfidf_svc2.pkl"))
+    print("✅ Modelo y vectorizador cargados correctamente.")
+except Exception as e:
+    print("❌ Error cargando modelo/vectorizador:", e)
+
+# ==============================
+# 3. Ruta raíz de prueba
+# ==============================
+@app.route("/")
+def home():
+    return "API de predicción funcionando correctamente 🚀"
+
+# ==============================
+# 4. Ruta de predicción
+# ==============================
+@app.route("/predict", methods=["POST"])
 def predict():
     try:
         data = request.get_json()
 
-        if not data or 'texto' not in data:
+        # Validación del input
+        if not data or "texto" not in data:
             return jsonify({"error": "Falta el campo 'texto' en el JSON"}), 400
 
-        texto = data['texto']
+        texto = data["texto"]
+
+        # Transformar texto con el vectorizador entrenado
         X = vectorizer.transform([texto])
         pred = modelo.predict(X)[0]
 
-        # Mapear predicción de texto
+        # Mapear sentimiento
         if pred.lower() == "negative":
             sentimiento = "NEGATIVO 😞"
         elif pred.lower() == "neutral":
@@ -42,15 +52,24 @@ def predict():
         elif pred.lower() == "positive":
             sentimiento = "POSITIVO 😊"
         else:
-            sentimiento = "DESCONOCIDO"
+            sentimiento = "DESCONOCIDO 🤔"
 
         return jsonify({
             "texto": texto,
             "sentimiento": sentimiento,
             "valor": pred
         })
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# ==============================
+# 5. Ejecutar localmente
+# ==============================
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=8000)
+
 
 # ==============================
 # 5. Ejecutar servidor
