@@ -1,22 +1,24 @@
+@app.route("/")
+def home():
+    return "API de predicción funcionando correctamente 🚀" 
+
+import os
 import joblib
 import pandas as pd
 from flask import Flask, request, jsonify
-import os
+
+# Ruta base donde está el app.py
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Cargar modelo y vectorizador con ruta absoluta
+modelo = joblib.load(os.path.join(BASE_DIR, "modelo_svc2.pkl"))
+vectorizer = joblib.load(os.path.join(BASE_DIR, "vectorizer_tfidf_svc2.pkl"))
 
 # ==============================
 # 1. Inicializar la aplicación
 # ==============================
 app = Flask(__name__)
 
-# ==============================
-# 2. Cargar el modelo y vectorizador
-# ==============================
-modelo = joblib.load("modelo_svc2.pkl")
-vectorizer = joblib.load("vectorizer_tfidf_svc2.pkl")
-
-@app.route("/")
-def home():
-    return "API de predicción funcionando correctamente 🚀"
 # ==============================
 # 3. Ruta de prueba
 # ==============================
