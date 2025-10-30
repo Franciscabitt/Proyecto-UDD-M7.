@@ -13,6 +13,9 @@ app = Flask(__name__)
 modelo = joblib.load("modelo_svc2.pkl")
 vectorizer = joblib.load("vectorizer_tfidf_svc2.pkl")
 
+@app.route("/")
+def home():
+    return "API de predicción funcionando correctamente 🚀"
 # ==============================
 # 3. Ruta de prueba
 # ==============================
