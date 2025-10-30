@@ -1,6 +1,7 @@
 import joblib
 import pandas as pd
 from flask import Flask, request, jsonify
+import os
 
 # ==============================
 # 1. Inicializar la aplicación
